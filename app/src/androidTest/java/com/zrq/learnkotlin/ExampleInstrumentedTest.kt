@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.supervisorScope
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -104,5 +106,35 @@ class ExampleInstrumentedTest {
     private suspend fun doTwo(): Int {
         delay(100)
         return 25
+    }
+
+    @Test
+    fun testCoroutineScopeBuilder() = runBlocking {
+        coroutineScope {
+            val job1 = async {
+                delay(200)
+                println("job1 finish")
+            }
+            val job2 = async {
+                delay(100)
+                println("job2 finish")
+                throw Exception("job2 error")
+            }
+        }
+    }
+
+    @Test
+    fun testSupervisorScopeBuilder() = runBlocking {
+        supervisorScope {
+            val job1 = async {
+                delay(200)
+                println("job1 finish")
+            }
+            val job2 = async {
+                delay(100)
+                println("job2 finish")
+                throw Exception("job2 error")
+            }
+        }
     }
 }
