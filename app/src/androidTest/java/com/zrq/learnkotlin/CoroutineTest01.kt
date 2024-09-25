@@ -1,7 +1,5 @@
 package com.zrq.learnkotlin
 
-import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -14,7 +12,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import org.junit.Assert.*
-import java.text.SimpleDateFormat
 import kotlin.system.measureTimeMillis
 
 /**
@@ -23,7 +20,7 @@ import kotlin.system.measureTimeMillis
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
+class CoroutineTest01 {
 
     @Test
     fun testCoroutineBuilder() = runBlocking {
