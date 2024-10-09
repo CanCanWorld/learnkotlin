@@ -9,9 +9,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CancellationException
@@ -73,16 +75,57 @@ class CoroutineTest02 {
         job1.cancelAndJoin()
     }
 
-    /**
-     *
-     */
     @Test
     fun testCancelCpuTaskByIsActive() = runBlocking<Unit> {
         val startTime = System.currentTimeMillis()
         val job = launch(Dispatchers.Default) {
             var nextPrintTime = startTime
             var i = 0
+            // 不加 isActive 时无法取消
             while (i < 5 && isActive) {
+                if (System.currentTimeMillis() >= nextPrintTime) {
+                    println("job: I'm sleeping ${i++} ...")
+                    nextPrintTime += 500
+                }
+            }
+        }
+        delay(1300)
+        println("main: I'm tired of waiting!")
+        job.cancelAndJoin()
+        println("main: Now I can quit.")
+    }
+
+    @Test
+    fun testCancelCpuTaskByEnsureActive() = runBlocking<Unit> {
+        val startTime = System.currentTimeMillis()
+        val job = launch(Dispatchers.Default) {
+            var nextPrintTime = startTime
+            var i = 0
+            while (i < 5) {
+                // 源码:
+                // if (!isActive) throw getCancellationException()
+                // 也相当于上一种方式
+                ensureActive()
+                if (System.currentTimeMillis() >= nextPrintTime) {
+                    println("job: I'm sleeping ${i++} ...")
+                    nextPrintTime += 500
+                }
+            }
+        }
+        delay(1300)
+        println("main: I'm tired of waiting!")
+        job.cancelAndJoin()
+        println("main: Now I can quit.")
+    }
+
+    @Test
+    fun testCancelCpuTaskByYield() = runBlocking<Unit> {
+        val startTime = System.currentTimeMillis()
+        val job = launch(Dispatchers.Default) {
+            var nextPrintTime = startTime
+            var i = 0
+            while (i < 5) {
+                yield()
                 if (System.currentTimeMillis() >= nextPrintTime) {
                     println("job: I'm sleeping ${i++} ...")
                     nextPrintTime += 500
